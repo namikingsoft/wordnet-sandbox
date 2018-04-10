@@ -12,6 +12,9 @@
     "start": "babel-node src/index.js",
     "eslint-check": "eslint --print-config .eslintrc.js | eslint-config-prettier-check"
   },
+  "dependencies": {
+    "better-sqlite3": "^4.1.0"
+  },
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-eslint": "^8.2.2",
