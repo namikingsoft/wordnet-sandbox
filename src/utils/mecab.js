@@ -1,6 +1,18 @@
 // @flow
 import { spawn } from 'child_process';
-import Database from 'better-sqlite3';
+
+type MecabMorpheme = {
+  surface: string,
+  reading: string,
+  basic: string,
+  feature0: string,
+  feature1: string,
+  feature2: string,
+  feature3: string,
+  feature4: string,
+  feature5: string,
+  nbest: number,
+};
 
 type MecabStdioParam = {
   dicdir?: string,
@@ -9,14 +21,19 @@ type MecabStdioParam = {
   timeoutMsec?: number,
 };
 
+type MecabStdioInstance = {
+  exit: void => void,
+  parse: string => Promise<MecabMorpheme[]>,
+};
+
 const eosLabel = 'EOS';
 
-const mecabStdio = ({
+export const mecabStdio: MecabStdioParam => MecabStdioInstance = ({
   dicdir,
   nbest = 1,
   pollingMsec = 100,
   timeoutMsec = 10000,
-}: MecabStdioParam = {}) => {
+} = {}) => {
   const lines = [];
   const args = [
     `-E${eosLabel}`,
@@ -30,7 +47,7 @@ const mecabStdio = ({
   });
   return {
     exit: () => mecab.kill(),
-    parse: str =>
+    parse: (str: string) =>
       new Promise((resolve, reject) => {
         mecab.stdin.write(str.replace(/\n/g, ' '));
         mecab.stdin.write('\n');
@@ -97,60 +114,5 @@ const mecabStdio = ({
 //   console.log(xs);
 //   mecab.exit();
 // });
-const db = new Database('/resources/wnjpn.db');
-const senses = db
-  .prepare(
-    `
-    SELECT sense.synset, word.lemma FROM sense
-      INNER JOIN word ON word.wordid = sense.wordid
-      WHERE word.lemma LIKE ?
-      ORDER BY sense.synset ASC
-  `,
-  )
-  .all('%淫乱%');
-console.log(senses);
 
-senses.forEach(({ synset }) => {
-  const childSenses = db
-    .prepare(
-      `
-      SELECT sense.synset, word.lemma FROM sense
-        INNER JOIN word ON word.wordid = sense.wordid
-        WHERE sense.synset = ?
-          AND sense.lang = 'jpn'
-        ORDER BY sense.synset ASC
-    `,
-    )
-    .all(synset);
-  console.log(childSenses);
-});
-
-senses.forEach(({ synset }) => {
-  const synsSenses = db
-    .prepare(
-      `
-      SELECT synlink.link, synlink.synset2 FROM sense
-        INNER JOIN word ON word.wordid = sense.wordid
-        INNER JOIN synlink ON synlink.synset1 = sense.synset
-        WHERE sense.synset = ?
-          AND sense.lang = 'jpn'
-          -- AND synlink.link = 'syns'
-        ORDER BY sense.synset ASC
-    `,
-    )
-    .all(synset);
-  synsSenses.forEach(({ link, synset2 }) => {
-    const childSenses = db
-      .prepare(
-        `
-        SELECT sense.synset, word.lemma FROM sense
-          INNER JOIN word ON word.wordid = sense.wordid
-          WHERE sense.synset = ?
-            AND sense.lang = 'jpn'
-          ORDER BY sense.synset ASC
-      `,
-      )
-      .all(synset2);
-    if (childSenses.length > 0) console.log(link, childSenses);
-  });
-});
+export default mecabStdio;

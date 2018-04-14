@@ -1,5 +1,8 @@
 FROM node:8.11.1-wheezy
 
+ENV DOCKER true
+ENV APP_ROOT /app
+
 RUN apt-get update\
  && apt-get install -y --no-install-recommends mecab libmecab-dev sqlite3\
  && apt-get clean\
@@ -23,11 +26,19 @@ RUN git clone --depth 1 https://github.com/neologd/mecab-ipadic-neologd.git\
  && cd ..\
  && rm -rf mecab-ipadic-neologd
 
-COPY package.json /app/
-COPY yarn.lock /app/
+COPY package.json $APP_ROOT/
+COPY yarn.lock $APP_ROOT/
 
-WORKDIR /app
+WORKDIR $APP_ROOT
 
-RUN yarn install
+RUN yarn install\
+ && yarn cache clean
 
-COPY . /app
+COPY . $APP_ROOT
+COPY ./docker-entrypoint.sh /
+
+ENTRYPOINT ["/docker-entrypoint.sh"]
+CMD ["server"]
+
+EXPOSE 3000
+EXPOSE 8080
