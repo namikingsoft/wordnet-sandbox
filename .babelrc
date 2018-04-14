@@ -1,10 +1,13 @@
 {
   "presets": [
     "backpack-core/babel",
+    "react",
     "env"
   ],
   "plugins": [
+    "react-hot-loader/babel",
     "transform-flow-strip-types",
+    "transform-class-properties",
     "transform-object-rest-spread"
   ]
 }

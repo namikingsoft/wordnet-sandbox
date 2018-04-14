@@ -18,7 +18,7 @@ const htmlConfig = {
 
 const common = {
   entry: {
-    script: ['./src/front'],
+    script: ['babel-polyfill', './src/front'],
   },
   output: {
     path: path.join(__dirname, 'dist'),
@@ -49,7 +49,7 @@ const common = {
     ],
   },
   resolve: {
-    extensions: ['.js'],
+    extensions: ['.js', '.jsx'],
     modules: [path.resolve(__dirname, 'src'), 'node_modules'],
   },
 };

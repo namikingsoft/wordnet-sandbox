@@ -1,10 +1,10 @@
 // @flow
-import express from 'express';
 import Database from 'better-sqlite3';
 
 const db = new Database('/resources/wnjpn.db');
 
-const getSyns = (str: string) => {
+export const search = (text: string) => {
+  console.log(text);
   const data = {};
   const senses = db
     .prepare(
@@ -15,7 +15,7 @@ const getSyns = (str: string) => {
       ORDER BY sense.synset ASC
   `,
     )
-    .all(`%${str}%`);
+    .all(`%${text}%`);
 
   senses.forEach(({ synset }) => {
     const childSenses = db
@@ -29,7 +29,7 @@ const getSyns = (str: string) => {
     `,
       )
       .all(synset);
-    data[synset] = childSenses;
+    data[synset] = childSenses.map(x => ({ ...x, link: 'self' }));
   });
 
   senses.forEach(({ synset }) => {
@@ -66,8 +66,4 @@ const getSyns = (str: string) => {
   return data;
 };
 
-const app = express();
-
-app.get('/test', (req, res) => res.send('test'));
-
-app.listen(3000, () => console.log('Start'));
+export default search;

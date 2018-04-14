@@ -10,7 +10,7 @@ services:
       - DEBUG=true
     ports:
       - 3000:3000
-    command: sh -c "yarn && yarn server:dev"
+    command: yarn server:dev
   front:
     build: .
     volumes:
@@ -20,7 +20,15 @@ services:
       - DEBUG=true
     ports:
       - 8080:8080
-    command: sh -c "yarn && yarn front:dev"
+    command: yarn front:dev
+  yarn:
+    build: .
+    volumes:
+      - .:/app
+      - app_node_modules:/app/node_modules
+    stdin_open: true
+    tty: true
+    command: yarn
 
 volumes:
   app_node_modules:
