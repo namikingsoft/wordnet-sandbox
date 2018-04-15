@@ -141,10 +141,6 @@ var app = (0, _express2.default)();
 
 app.use((0, _cors2.default)());
 
-app.get('/test', function (req, res) {
-  return res.send('test');
-});
-
 app.get('/wordnet/search', function (req, res) {
   var text = req.query.text;
 
@@ -215,33 +211,67 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var db = new _betterSqlite2.default('/resources/wnjpn.db');
 
 var search = exports.search = function search(text) {
-  console.log(text);
   var data = {};
-  var senses = db.prepare('\n    SELECT sense.synset, word.lemma FROM sense\n      INNER JOIN word ON word.wordid = sense.wordid\n      WHERE word.lemma LIKE ?\n      ORDER BY sense.synset ASC\n  ').all('%' + text + '%');
+  var senses = db.prepare('\n      SELECT sense.synset, word.lemma FROM sense\n        INNER JOIN word ON word.wordid = sense.wordid\n        WHERE word.lemma LIKE ?\n        ORDER BY sense.synset ASC\n      ').all('%' + text + '%');
 
   senses.forEach(function (_ref) {
     var synset = _ref.synset;
 
-    var childSenses = db.prepare('\n      SELECT sense.synset, word.lemma FROM sense\n        INNER JOIN word ON word.wordid = sense.wordid\n        WHERE sense.synset = ?\n          AND sense.lang = \'jpn\'\n        ORDER BY sense.synset ASC\n    ').all(synset);
-    data[synset] = childSenses.map(function (x) {
-      return _extends({}, x, { link: 'self' });
-    });
+    var childSenses = db.prepare('\n        SELECT sense.synset, word.lemma FROM sense\n          INNER JOIN word ON word.wordid = sense.wordid\n          WHERE sense.synset = ?\n            AND sense.lang = \'jpn\'\n          ORDER BY sense.synset ASC\n        ').all(synset);
+    data[synset] = { senses: childSenses, link: 'self' };
   });
 
   senses.forEach(function (_ref2) {
     var synset = _ref2.synset;
 
-    var synsSenses = db.prepare('\n      SELECT synlink.link, synlink.synset2 FROM sense\n        INNER JOIN word ON word.wordid = sense.wordid\n        INNER JOIN synlink ON synlink.synset1 = sense.synset\n        WHERE sense.synset = ?\n          AND sense.lang = \'jpn\'\n          -- AND synlink.link = \'syns\'\n        ORDER BY sense.synset ASC\n    ').all(synset);
+    var synsSenses = db.prepare('\n        SELECT synlink.link, synlink.synset2 FROM sense\n          INNER JOIN word ON word.wordid = sense.wordid\n          INNER JOIN synlink ON synlink.synset1 = sense.synset\n          WHERE sense.synset = ?\n            AND sense.lang = \'jpn\'\n          ORDER BY sense.synset ASC\n        ').all(synset);
     synsSenses.forEach(function (_ref3) {
       var link = _ref3.link,
           synset2 = _ref3.synset2;
 
-      var childSenses = db.prepare('\n        SELECT sense.synset, word.lemma FROM sense\n          INNER JOIN word ON word.wordid = sense.wordid\n          WHERE sense.synset = ?\n            AND sense.lang = \'jpn\'\n          ORDER BY sense.synset ASC\n      ').all(synset2);
-      if (childSenses.length > 0) {
-        data[synset2] = _extends({}, childSenses, { link: link });
+      var childSenses = db.prepare('\n          SELECT sense.synset, word.lemma FROM sense\n            INNER JOIN word ON word.wordid = sense.wordid\n            WHERE sense.synset = ?\n              AND sense.lang = \'jpn\'\n            ORDER BY sense.synset ASC\n          ').all(synset2);
+      if (childSenses.length > 0 && !data[synset2]) {
+        data[synset2] = { senses: childSenses, link: link };
       }
     });
   });
+
+  Object.keys(data).forEach(function (synset) {
+    var linkNet = {};
+    // Object.keys(data).forEach(s => {
+    //   if (
+    //     synset !== s &&
+    //     data[synset].link === 'self' &&
+    //     data[synset].link === data[s].link
+    //   ) {
+    //     linkNet[s] = data[s].link;
+    //   }
+    // });
+    {
+      var links = db.prepare('\n          SELECT synlink.* FROM synlink\n            WHERE synlink.synset1 = ?\n          ').all(synset);
+      links.forEach(function (_ref4) {
+        var synset2 = _ref4.synset2,
+            link = _ref4.link;
+
+        if (data[synset2]) linkNet[synset2] = link;
+      });
+    }
+    // {
+    //   const links = db
+    //     .prepare(
+    //       `
+    //       SELECT synlink.* FROM synlink
+    //         WHERE synlink.synset2 = ?
+    //       `,
+    //     )
+    //     .all(synset);
+    //   links.forEach(({ synset1, link }) => {
+    //     if (data[synset1]) linkNet[synset1] = link;
+    //   });
+    // }
+    data[synset] = _extends({}, data[synset], { linkNet: linkNet });
+  });
+
   return data;
 };
 

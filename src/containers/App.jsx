@@ -1,13 +1,18 @@
 // @flow
-import { compose, withStateHandlers, mapProps } from 'recompose';
+import { compose, withHandlers, withStateHandlers, mapProps } from 'recompose';
 import { hot } from 'react-hot-loader';
 
 import { didMount } from './highorders/lifecycle';
 import { Page } from '../components/Page';
+import { type SearchedWordNet } from '../modules/wordnet/domain';
 
 type InternalProps = {
-  searchedWordNet: {},
-  setSearchedWordNet: ({}) => *,
+  searchedWordNet: ?SearchedWordNet,
+  setSearchedWordNet: (?SearchedWordNet) => *,
+  handleChangeText: Event => *,
+  handleSubmit: Event => *,
+  text: string,
+  changeText: string => *,
 };
 
 export const App = compose(
@@ -15,25 +20,44 @@ export const App = compose(
   withStateHandlers(
     {
       searchedWordNet: null,
+      text: '',
     },
     {
       setSearchedWordNet: () => searchedWordNet => ({ searchedWordNet }),
+      changeText: () => text => ({ text }),
     },
   ),
+  withHandlers({
+    handleChangeText: ({ changeText }: InternalProps) => event => {
+      changeText(event.target.value);
+    },
+    handleSubmit: ({
+      text,
+      setSearchedWordNet,
+    }: InternalProps) => async event => {
+      event.preventDefault();
+      setSearchedWordNet(null);
+      const body = await window
+        .fetch(
+          `http://localhost:3000/wordnet/search?text=${encodeURIComponent(
+            text,
+          )}`,
+        )
+        .then(res => res.json());
+      setSearchedWordNet(body);
+    },
+  }),
   didMount(async ({ setSearchedWordNet }: InternalProps) => {
     const body = await window
       .fetch(
         `http://localhost:3000/wordnet/search?text=${encodeURIComponent(
           '卑猥',
         )}`,
-        {
-          method: 'GET',
-        },
       )
       .then(res => res.json());
     setSearchedWordNet(body);
   }),
-  mapProps(({ setValue, ...rest }) => rest),
+  mapProps(({ text, changeText, setSearchedWordNet, ...rest }) => rest),
 )(Page);
 
 export default App;

@@ -10,8 +10,6 @@ const app = express();
 
 app.use(cors());
 
-app.get('/test', (req, res) => res.send('test'));
-
 app.get('/wordnet/search', (req, res) => {
   const { text } = req.query;
   if (!text) return res.status(400).send({ error: 'required text param' });
