@@ -37,6 +37,9 @@ RUN yarn install\
 COPY . $APP_ROOT
 COPY ./docker-entrypoint.sh /
 
+RUN yarn server:build\
+ && yarn front:build
+
 ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["server"]
 

@@ -1,11 +1,11 @@
 #!/bin/sh -eu
 
 if [ "$1" = "server" ]; then
-  exec yarn server:dev
+  exec yarn server:start
 fi
 
 if [ "$1" = "front" ]; then
-  exec yarn front:dev
+  exec yarn front:start
 fi
 
 exec "$@"
