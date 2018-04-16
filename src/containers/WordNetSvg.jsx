@@ -203,7 +203,7 @@ export const WordNetSvg: React.ComponentType<Props> = compose(
       }
     },
   ),
-  mapProps(({ element, handleResize, ...rest }) => ({
+  mapProps(({ element, handleResize, searchText, ...rest }) => ({
     ...rest,
   })),
 )(Svg);
