@@ -64,41 +64,17 @@ export const search = (text: string) => {
 
   Object.keys(data).forEach(synset => {
     const linkNet = {};
-    // Object.keys(data).forEach(s => {
-    //   if (
-    //     synset !== s &&
-    //     data[synset].link === 'self' &&
-    //     data[synset].link === data[s].link
-    //   ) {
-    //     linkNet[s] = data[s].link;
-    //   }
-    // });
-    {
-      const links = db
-        .prepare(
-          `
+    const links = db
+      .prepare(
+        `
           SELECT synlink.* FROM synlink
             WHERE synlink.synset1 = ?
           `,
-        )
-        .all(synset);
-      links.forEach(({ synset2, link }) => {
-        if (data[synset2]) linkNet[synset2] = link;
-      });
-    }
-    // {
-    //   const links = db
-    //     .prepare(
-    //       `
-    //       SELECT synlink.* FROM synlink
-    //         WHERE synlink.synset2 = ?
-    //       `,
-    //     )
-    //     .all(synset);
-    //   links.forEach(({ synset1, link }) => {
-    //     if (data[synset1]) linkNet[synset1] = link;
-    //   });
-    // }
+      )
+      .all(synset);
+    links.forEach(({ synset2, link }) => {
+      if (data[synset2]) linkNet[synset2] = link;
+    });
     data[synset] = { ...data[synset], linkNet };
   });
 
