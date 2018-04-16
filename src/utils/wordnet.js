@@ -5,7 +5,7 @@ const db = new Database('/resources/wnjpn.db');
 
 export const search = (text: string) => {
   const data = {};
-  const senses = db
+  const selfSenses = db
     .prepare(
       `
       SELECT sense.synset, word.lemma FROM sense
@@ -16,7 +16,7 @@ export const search = (text: string) => {
     )
     .all(`%${text}%`);
 
-  senses.forEach(({ synset }) => {
+  selfSenses.forEach(({ synset }) => {
     const childSenses = db
       .prepare(
         `
@@ -31,36 +31,45 @@ export const search = (text: string) => {
     data[synset] = { senses: childSenses, link: 'self' };
   });
 
-  senses.forEach(({ synset }) => {
-    const synsSenses = db
-      .prepare(
-        `
-        SELECT synlink.link, synlink.synset2 FROM sense
-          INNER JOIN word ON word.wordid = sense.wordid
-          INNER JOIN synlink ON synlink.synset1 = sense.synset
-          WHERE sense.synset = ?
-            AND sense.lang = 'jpn'
-          ORDER BY sense.synset ASC
-        `,
-      )
-      .all(synset);
-    synsSenses.forEach(({ link, synset2 }) => {
-      const childSenses = db
+  const findRecurcive = senses => {
+    const preDataNum = Object.keys(data).length;
+    senses.forEach(({ synset }) => {
+      const synsSenses = db
         .prepare(
           `
-          SELECT sense.synset, word.lemma FROM sense
+          SELECT synlink.link, synlink.synset2 as synset FROM sense
             INNER JOIN word ON word.wordid = sense.wordid
+            INNER JOIN synlink ON synlink.synset1 = sense.synset
             WHERE sense.synset = ?
               AND sense.lang = 'jpn'
             ORDER BY sense.synset ASC
           `,
         )
-        .all(synset2);
-      if (childSenses.length > 0 && !data[synset2]) {
-        data[synset2] = { senses: childSenses, link };
-      }
+        .all(synset)
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 5);
+      synsSenses.forEach(({ link, ...s }) => {
+        const childSenses = db
+          .prepare(
+            `
+            SELECT sense.synset, word.lemma FROM sense
+              INNER JOIN word ON word.wordid = sense.wordid
+              WHERE sense.synset = ?
+                AND sense.lang = 'jpn'
+              ORDER BY sense.synset ASC
+            `,
+          )
+          .all(s.synset);
+        if (childSenses.length > 0 && !data[s.synset]) {
+          data[s.synset] = { senses: childSenses, link };
+        }
+      });
+      const dataNum = Object.keys(data).length;
+      if (dataNum === preDataNum || dataNum > 30) return;
+      findRecurcive(synsSenses);
     });
-  });
+  };
+  findRecurcive(selfSenses);
 
   Object.keys(data).forEach(synset => {
     const linkNet = {};
