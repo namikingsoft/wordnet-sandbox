@@ -56,7 +56,8 @@ export const App = compose(
     },
   }),
   didMount(({ searchText }: InternalProps) => {
-    searchText('卑猥'); // TODO
+    // searchText('正しさ');
+    searchText('鉄砲'); // TODO
   }),
   mapProps(({ changeText, setSearchedWordNet, ...rest }) => rest),
 )(Page);

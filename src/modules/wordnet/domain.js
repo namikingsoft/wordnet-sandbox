@@ -37,9 +37,9 @@ export const convertToForceData: SearchedWordNet => ForceData = searched => {
   const links = [];
   const synsetIndexBySynset = {};
   Object.keys(searched).forEach(synset => {
-    const { senses } = searched[synset];
+    const { senses, link } = searched[synset];
     synsetIndexBySynset[synset] = nodes.length;
-    nodes.push({ label: '', r: 20 + senses.length * 3 });
+    nodes.push({ label: '', r: 20 + senses.length * 3, link });
     senses.forEach(child => {
       links.push({ source: synsetIndexBySynset[synset], target: nodes.length });
       nodes.push({ label: child.lemma, r: 2 });
@@ -53,16 +53,24 @@ export const convertToForceData: SearchedWordNet => ForceData = searched => {
         synset1 === synset2 ||
         synsetIndexBySynset[synset1] == null ||
         synsetIndexBySynset[synset2] == null ||
-        (synsetLinkCache[synset2] && synsetLinkCache[synset2][synset1])
+        synsetLinkCache[`${synset1}=${synset2}`]
       )
         return;
-      synsetLinkCache[synset1] = {};
-      synsetLinkCache[synset1][synset2] = true;
-      links.push({
-        source: synsetIndexBySynset[synset1],
-        target: synsetIndexBySynset[synset2],
-        link: linkNet[synset2],
-      });
+      synsetLinkCache[`${synset1}=${synset2}`] = true;
+      synsetLinkCache[`${synset2}=${synset1}`] = true;
+      if (linkNet[synset2] === 'hype') {
+        links.push({
+          source: synsetIndexBySynset[synset2],
+          target: synsetIndexBySynset[synset1],
+          link: linkNet[synset2],
+        });
+      } else {
+        links.push({
+          source: synsetIndexBySynset[synset1],
+          target: synsetIndexBySynset[synset2],
+          link: linkNet[synset2],
+        });
+      }
     });
   });
   return { nodes, links };

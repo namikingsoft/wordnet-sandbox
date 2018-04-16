@@ -90,14 +90,27 @@ export const WordNetSvg: React.ComponentType<Props> = compose(
         svg
           .append('defs')
           .append('marker')
-          .attr('id', 'arrowhead')
-          .attr('refX', 0)
-          .attr('refY', 2)
+          .attr('id', 'arrowstart')
+          .attr('refX', -30)
+          .attr('refY', 4)
           .attr('markerWidth', 10)
           .attr('markerHeight', 10)
           .attr('orient', 'auto')
           .append('path')
-          .attr('d', 'M 0,0 V 4 L4,2 Z')
+          .attr('d', 'M 0,0 V 8 L8,4 Z')
+          .attr('fill', 'steelblue');
+
+        svg
+          .append('defs')
+          .append('marker')
+          .attr('id', 'arrowend')
+          .attr('refX', 30)
+          .attr('refY', 4)
+          .attr('markerWidth', 10)
+          .attr('markerHeight', 10)
+          .attr('orient', 'auto')
+          .append('path')
+          .attr('d', 'M 0,0 V 8 L8,4 Z')
           .attr('fill', 'steelblue');
 
         const line = svg
@@ -108,15 +121,31 @@ export const WordNetSvg: React.ComponentType<Props> = compose(
           .enter()
           .append('line')
           .attr('stroke', d => {
+            if (!d.link) return '#eee';
             switch (d.link) {
-              case 'self':
-                return 'blue';
+              case 'hype':
+              case 'hypo':
+                return 'steelblue';
               default:
-                return '#eee';
+                return '#aaa';
             }
           })
-          .attr('marker-end', 'url(#arrowhead)')
-          .attr('stroke-width', 2);
+          .attr(
+            'marker-start',
+            d =>
+              d.link && (d.link === 'hype' || d.link === 'hypo')
+                ? 'url(#arrowstart)'
+                : null,
+          )
+          .attr(
+            'marker-end',
+            d =>
+              d.link && (d.link === 'hype' || d.link === 'hypo')
+                ? 'url(#arrowend)'
+                : null,
+          )
+          .attr('stroke-dasharray', d => (d.link ? '5, 5' : null))
+          .attr('stroke-width', d => (d.link === 'sim' ? 2 : 1));
 
         const node = svg
           .selectAll('g.nodes')
@@ -128,9 +157,13 @@ export const WordNetSvg: React.ComponentType<Props> = compose(
         node
           .append('circle')
           .attr('r', d => d.r)
-          .style('fill', d => (d.label ? 'black' : '#ccc'))
-          .style('stroke', d => (d.label ? 'black' : '#999'))
-          .style('stroke-width', 1)
+          .style('fill', d => {
+            if (d.label) return 'black';
+            if (d.link === 'self') return 'steelblue';
+            return '#ccc';
+          })
+          // .style('stroke', d => (d.label ? 'black' : '#999'))
+          // .style('stroke-width', 1)
           .style('opacity', d => (d.label ? 1 : 0.3))
           .call(
             /* eslint-disable no-param-reassign */
@@ -199,7 +232,7 @@ export const WordNetSvg: React.ComponentType<Props> = compose(
           .links(links)
           .distance(() => 50)
           .strength(() => 2);
-        simulation.force('charge').strength(() => -150);
+        simulation.force('charge').strength(() => -175);
       }
     },
   ),
