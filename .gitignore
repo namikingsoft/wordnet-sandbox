@@ -2,4 +2,6 @@
 /node_modules
 /.env
 /.cache
+/build
 /local.log
+/yarn-error.log

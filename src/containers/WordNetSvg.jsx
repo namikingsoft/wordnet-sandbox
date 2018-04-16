@@ -11,6 +11,7 @@ import {
 import { Svg } from '../components/Svg';
 
 type Props = {
+  text: string,
   value: ?SearchedWordNet,
 };
 
@@ -18,6 +19,7 @@ type InternalProps = {
   element: ?React$ElementRef<*>,
   setElement: (React$ElementRef<*>) => *,
   handleResize: void => *,
+  searchText: string => *,
   ...$Exact<Props>,
 };
 
@@ -70,109 +72,137 @@ export const WordNetSvg: React.ComponentType<Props> = compose(
   willUnmount(({ handleResize }: InternalProps) => {
     window.removeEventListener('resize', handleResize);
   }),
-  didUpdate(({ value, element, handleResize }: InternalProps, prev) => {
-    if (element && element !== prev.element) {
-      handleResize();
-    }
-    if (element && value && value !== prev.value) {
-      const { width, height } = element.getBoundingClientRect();
-      const svg = d3.select(element);
-      svg.selectAll('*').remove();
-      const { nodes, links } = convertToForceData(value);
-      const simulation = d3.forceSimulation();
+  didUpdate(
+    (
+      { text, value, element, handleResize, searchText }: InternalProps,
+      prev,
+    ) => {
+      if (element && element !== prev.element) {
+        handleResize();
+      }
+      if (element && value && value !== prev.value) {
+        const { width, height } = element.getBoundingClientRect();
+        const svg = d3.select(element);
+        svg.selectAll('*').remove();
+        const { nodes, links } = convertToForceData(value);
+        const simulation = d3.forceSimulation();
 
-      const line = svg
-        .append('g')
-        .attr('class', 'links')
-        .selectAll('line')
-        .data(links)
-        .enter()
-        .append('line')
-        .attr('stroke', d => {
-          switch (d.link) {
-            case 'self':
-              return 'blue';
-            default:
-              return '#eee';
-          }
-        });
-      // .attr('stroke-width', 0);
+        svg
+          .append('defs')
+          .append('marker')
+          .attr('id', 'arrowhead')
+          .attr('refX', 0)
+          .attr('refY', 2)
+          .attr('markerWidth', 10)
+          .attr('markerHeight', 10)
+          .attr('orient', 'auto')
+          .append('path')
+          .attr('d', 'M 0,0 V 4 L4,2 Z')
+          .attr('fill', 'steelblue');
 
-      const node = svg
-        .selectAll('g.nodes')
-        .data(nodes)
-        .enter()
-        .append('g')
-        .attr('class', 'nodes');
+        const line = svg
+          .append('g')
+          .attr('class', 'links')
+          .selectAll('line')
+          .data(links)
+          .enter()
+          .append('line')
+          .attr('stroke', d => {
+            switch (d.link) {
+              case 'self':
+                return 'blue';
+              default:
+                return '#eee';
+            }
+          })
+          .attr('marker-end', 'url(#arrowhead)')
+          .attr('stroke-width', 2);
 
-      node
-        .append('circle')
-        .attr('r', d => d.r)
-        .style('fill', d => (d.label ? 'black' : '#ccc'))
-        .style('opacity', d => (d.label ? 1 : 0.3))
-        .call(
-          /* eslint-disable no-param-reassign */
-          d3
-            .drag()
-            .on('start', d => {
-              if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-              d.fx = d.x;
-              d.fy = d.y;
-            })
-            .on('drag', d => {
-              d.fx = d3.event.x;
-              d.fy = d3.event.y;
-            })
-            .on('end', d => {
-              if (!d3.event.active) simulation.alphaTarget(0);
-              d.fx = null;
-              d.fy = null;
-            }),
-          /* eslint-enable no-param-reassign */
-        );
-
-      node
-        .append('text')
-        .attr('dx', 7)
-        .attr('dy', '.35em')
-        .text(d => d.label)
-        .style('font-size', '12px');
-
-      const ticked = () => {
-        line
-          .attr('x1', d => d.source.x)
-          .attr('y1', d => d.source.y)
-          .attr('x2', d => d.target.x)
-          .attr('y2', d => d.target.y);
+        const node = svg
+          .selectAll('g.nodes')
+          .data(nodes)
+          .enter()
+          .append('g')
+          .attr('class', 'nodes');
 
         node
-          .selectAll('circle')
-          .attr('cx', d => d.x)
-          .attr('cy', d => d.y);
+          .append('circle')
+          .attr('r', d => d.r)
+          .style('fill', d => (d.label ? 'black' : '#ccc'))
+          .style('stroke', d => (d.label ? 'black' : '#999'))
+          .style('stroke-width', 1)
+          .style('opacity', d => (d.label ? 1 : 0.3))
+          .call(
+            /* eslint-disable no-param-reassign */
+            d3
+              .drag()
+              .on('start', d => {
+                if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x;
+                d.fy = d.y;
+              })
+              .on('drag', d => {
+                d.fx = d3.event.x;
+                d.fy = d3.event.y;
+              })
+              .on('end', d => {
+                if (!d3.event.active) simulation.alphaTarget(0);
+                d.fx = null;
+                d.fy = null;
+              }),
+            /* eslint-enable no-param-reassign */
+          );
 
         node
-          .selectAll('text')
-          .attr('x', d => d.x)
-          .attr('y', d => d.y);
-      };
+          .append('text')
+          .attr('dx', 7)
+          .attr('dy', '.35em')
+          .text(d => d.label)
+          .style(
+            'font-size',
+            d => (d.label.indexOf(text) > -1 ? '1.6em' : '0.75em'),
+          );
 
-      simulation.nodes(nodes).on('tick', ticked);
-      simulation
-        .velocityDecay(0.5)
-        .force('link', d3.forceLink().id(d => d.index))
-        .force('collide', d3.forceCollide(d => d.r + 12).iterations(16))
-        .force('charge', d3.forceManyBody())
-        .force('center', d3.forceCenter(width / 2, height / 2))
-        .force('y', d3.forceY(0))
-        .force('x', d3.forceX(0));
-      simulation
-        .force('link')
-        .links(links)
-        .distance(() => 50)
-        .strength(() => 2);
-      simulation.force('charge').strength(() => -150);
-    }
-  }),
+        const ticked = () => {
+          line
+            .attr('x1', d => d.source.x)
+            .attr('y1', d => d.source.y)
+            .attr('x2', d => d.target.x)
+            .attr('y2', d => d.target.y);
+
+          node
+            .selectAll('circle')
+            .attr('cx', d => d.x)
+            .attr('cy', d => d.y);
+
+          node
+            .selectAll('text')
+            .attr('x', d => d.x)
+            .attr('y', d => d.y)
+            .style('cursor', 'pointer')
+            .on('click', d => {
+              if (d.label) searchText(d.label);
+            });
+        };
+
+        simulation.nodes(nodes).on('tick', ticked);
+        simulation
+          .velocityDecay(0.5)
+          .force('link', d3.forceLink().id(d => d.index))
+          .force('collide', d3.forceCollide(d => d.r + 12).iterations(16))
+          .force('charge', d3.forceManyBody())
+          .force('center', d3.forceCenter(width / 2, height / 2))
+          .force('y', d3.forceY(0))
+          .force('x', d3.forceX(0));
+        simulation
+          .force('link')
+          .links(links)
+          .distance(() => 50)
+          .strength(() => 2);
+        simulation.force('charge').strength(() => -150);
+      }
+    },
+  ),
   mapProps(({ element, handleResize, ...rest }) => ({
     ...rest,
   })),

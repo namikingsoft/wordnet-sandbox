@@ -13,6 +13,7 @@ type InternalProps = {
   handleSubmit: Event => *,
   text: string,
   changeText: string => *,
+  searchText: string => *,
 };
 
 export const App = compose(
@@ -35,7 +36,7 @@ export const App = compose(
       text,
       setSearchedWordNet,
     }: InternalProps) => async event => {
-      event.preventDefault();
+      if (event) event.preventDefault();
       setSearchedWordNet(null);
       const body = await window
         .fetch(
@@ -47,17 +48,17 @@ export const App = compose(
       setSearchedWordNet(body);
     },
   }),
-  didMount(async ({ setSearchedWordNet }: InternalProps) => {
-    const body = await window
-      .fetch(
-        `http://localhost:3000/wordnet/search?text=${encodeURIComponent(
-          '卑猥',
-        )}`,
-      )
-      .then(res => res.json());
-    setSearchedWordNet(body);
+  withHandlers({
+    searchText: ({ changeText, handleSubmit }: InternalProps) => async text => {
+      changeText(text);
+      await new Promise(resolve => setTimeout(resolve, 100)); // TODO
+      handleSubmit(window.event);
+    },
   }),
-  mapProps(({ text, changeText, setSearchedWordNet, ...rest }) => rest),
+  didMount(({ searchText }: InternalProps) => {
+    searchText('卑猥');
+  }),
+  mapProps(({ changeText, setSearchedWordNet, ...rest }) => rest),
 )(Page);
 
 export default App;
