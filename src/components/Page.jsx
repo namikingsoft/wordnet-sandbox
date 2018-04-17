@@ -1,10 +1,12 @@
 // @flow
+/* eslint-disable jsx-a11y/no-autofocus */
 import * as React from 'react';
 
 import { WordNetSvg } from '../containers/WordNetSvg';
 
 type Props = {
   text: string,
+  loading: boolean,
   searchedWordNet: {},
   handleChangeText: Event => *,
   handleSubmit: Event => *,
@@ -12,14 +14,17 @@ type Props = {
 
 export const Page = ({
   text,
+  loading,
   searchedWordNet,
   handleChangeText,
   handleSubmit,
 }: Props) => (
   <div>
     <form onSubmit={handleSubmit}>
-      <input type="text" value={text} onChange={handleChangeText} />
-      <button>Search</button>
+      <input type="text" value={text} onChange={handleChangeText} autoFocus />
+      <button style={{ border: loading && '0px' }}>
+        {loading ? 'Loading ...' : 'Search'}
+      </button>
     </form>
     <WordNetSvg
       text={text}
@@ -34,7 +39,6 @@ export const Page = ({
         userSelect: 'none',
       }}
     />
-    <div />
   </div>
 );
 
