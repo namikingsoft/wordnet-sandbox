@@ -14,7 +14,9 @@ export const search = (text: string) => {
         ORDER BY sense.synset ASC
       `,
     )
-    .all(`%${text}%`);
+    .all(`%${text}%`)
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 5);
 
   selfSenses.forEach(({ synset }) => {
     const childSenses = db
