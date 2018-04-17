@@ -59,8 +59,8 @@ export const App = compose(
     // TODO
     // searchText('正しさ');
     // searchText('鉄砲');
-    // searchText('風邪');
-    searchText('障害');
+    // searchText('障害');
+    searchText('風邪');
   }),
   mapProps(({ changeText, setSearchedWordNet, ...rest }) => rest),
 )(Page);

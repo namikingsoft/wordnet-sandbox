@@ -1,6 +1,16 @@
 .git
 .github
+.cache
+.eslintcache
+.eslintrc.js
+.flowconfig
+.node-version
 README.md
 Dockerfile
 docker-compose.yml
 node_modules
+dist
+build
+local.log
+npm-debug.log
+yarn-error.log

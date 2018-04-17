@@ -87,8 +87,8 @@ export const WordNetSvg: React.ComponentType<Props> = compose(
         const { nodes, links } = convertToForceData(value);
         const simulation = d3.forceSimulation();
 
-        svg
-          .append('defs')
+        const defs = svg.append('defs');
+        defs
           .append('marker')
           .attr('id', 'arrowstart')
           .attr('refX', -30)
@@ -99,9 +99,7 @@ export const WordNetSvg: React.ComponentType<Props> = compose(
           .append('path')
           .attr('d', 'M 0,0 V 8 L8,4 Z')
           .attr('fill', 'steelblue');
-
-        svg
-          .append('defs')
+        defs
           .append('marker')
           .attr('id', 'arrowend')
           .attr('refX', 30)
@@ -112,6 +110,50 @@ export const WordNetSvg: React.ComponentType<Props> = compose(
           .append('path')
           .attr('d', 'M 0,0 V 8 L8,4 Z')
           .attr('fill', 'steelblue');
+        defs
+          .append('marker')
+          .attr('id', 'arrowstartgrey')
+          .attr('refX', -30)
+          .attr('refY', 4)
+          .attr('markerWidth', 10)
+          .attr('markerHeight', 10)
+          .attr('orient', 'auto')
+          .append('path')
+          .attr('d', 'M 0,0 V 8 L8,4 Z')
+          .attr('fill', '#bbb');
+        defs
+          .append('marker')
+          .attr('id', 'arrowendgrey')
+          .attr('refX', 30)
+          .attr('refY', 4)
+          .attr('markerWidth', 10)
+          .attr('markerHeight', 10)
+          .attr('orient', 'auto')
+          .append('path')
+          .attr('d', 'M 0,0 V 8 L8,4 Z')
+          .attr('fill', '#bbb');
+        defs
+          .append('marker')
+          .attr('id', 'arrowstartgreen')
+          .attr('refX', -30)
+          .attr('refY', 4)
+          .attr('markerWidth', 10)
+          .attr('markerHeight', 10)
+          .attr('orient', 'auto')
+          .append('path')
+          .attr('d', 'M 0,0 V 8 L8,4 Z')
+          .attr('fill', '#9ACD32');
+        defs
+          .append('marker')
+          .attr('id', 'arrowendgreen')
+          .attr('refX', 30)
+          .attr('refY', 4)
+          .attr('markerWidth', 10)
+          .attr('markerHeight', 10)
+          .attr('orient', 'auto')
+          .append('path')
+          .attr('d', 'M 0,0 V 8 L8,4 Z')
+          .attr('fill', '#9ACD32');
 
         const line = svg
           .append('g')
@@ -126,26 +168,64 @@ export const WordNetSvg: React.ComponentType<Props> = compose(
               case 'hype':
               case 'hypo':
                 return 'steelblue';
+              case 'inst':
+              case 'hasi':
+              case 'sim':
+              case 'syns':
+                return '#9ACD32';
               default:
-                return '#aaa';
+                return '#bbb';
             }
           })
-          .attr(
-            'marker-start',
-            d =>
-              d.link && (d.link === 'hype' || d.link === 'hypo')
-                ? 'url(#arrowstart)'
-                : null,
-          )
-          .attr(
-            'marker-end',
-            d =>
-              d.link && (d.link === 'hype' || d.link === 'hypo')
-                ? 'url(#arrowend)'
-                : null,
-          )
-          .attr('stroke-dasharray', d => (d.link ? '5, 5' : null))
-          .attr('stroke-width', d => (d.link === 'sim' ? 2 : 1));
+          .attr('marker-start', d => {
+            switch (d.link) {
+              case 'hype':
+              case 'hypo':
+                return 'url(#arrowstart)';
+              case 'inst':
+              case 'hasi':
+                return 'url(#arrowstartgreen)';
+              case 'mero':
+              case 'mmem':
+              case 'msub':
+              case 'mprt':
+              case 'holo':
+              case 'hmem':
+              case 'hsub':
+              case 'hprt':
+                return 'url(#arrowstartgrey)';
+              default:
+                return null;
+            }
+          })
+          .attr('marker-end', d => {
+            switch (d.link) {
+              case 'hype':
+              case 'hypo':
+                return 'url(#arrowend)';
+              case 'inst':
+              case 'hasi':
+                return 'url(#arrowendgreen)';
+              case 'mero':
+              case 'mmem':
+              case 'msub':
+              case 'mprt':
+              case 'holo':
+              case 'hmem':
+              case 'hsub':
+              case 'hprt':
+                return 'url(#arrowendgrey)';
+              default:
+                return null;
+            }
+          })
+          .attr('stroke-dasharray', '5, 5')
+          .attr('stroke-width', 1);
+        // .attr('stroke-dasharray', d => (d.link ? '5, 5' : null))
+        // .attr(
+        //   'stroke-width',
+        //   d => (d.link === 'sim' || d.link === 'syns' ? 2 : 1),
+        // );
 
         const node = svg
           .selectAll('g.nodes')
@@ -190,11 +270,29 @@ export const WordNetSvg: React.ComponentType<Props> = compose(
           .append('text')
           .attr('dx', 7)
           .attr('dy', '.35em')
+          .attr('fill', '#555')
           .text(d => d.label)
           .style(
             'font-size',
             d => (d.label.indexOf(text) > -1 ? '1.6em' : '0.75em'),
-          );
+          )
+          .on('mouseover', function handleMouseOverText() {
+            d3.select(this).attr('fill', 'steelblue');
+          })
+          .on('mouseout', function handleMouseOutText() {
+            d3.select(this).attr('fill', '#555');
+          })
+          .on('click', function handleClickText(d) {
+            if (d.label) {
+              d3
+                .select(this)
+                .attr('stroke', 'steelblue')
+                .transition()
+                .duration(250)
+                .style('font-size', '1.6em');
+              searchText(d.label);
+            }
+          });
 
         const ticked = () => {
           line
@@ -212,10 +310,7 @@ export const WordNetSvg: React.ComponentType<Props> = compose(
             .selectAll('text')
             .attr('x', d => d.x)
             .attr('y', d => d.y)
-            .style('cursor', 'pointer')
-            .on('click', d => {
-              if (d.label) searchText(d.label);
-            });
+            .style('cursor', 'pointer');
         };
 
         simulation.nodes(nodes).on('tick', ticked);
@@ -230,9 +325,9 @@ export const WordNetSvg: React.ComponentType<Props> = compose(
         simulation
           .force('link')
           .links(links)
-          .distance(() => 50)
+          .distance(() => 10)
           .strength(() => 2);
-        simulation.force('charge').strength(() => -175);
+        simulation.force('charge').strength(() => -750);
       }
     },
   ),

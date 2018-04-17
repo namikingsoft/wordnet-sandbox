@@ -58,7 +58,14 @@ export const convertToForceData: SearchedWordNet => ForceData = searched => {
         return;
       synsetLinkCache[`${synset1}=${synset2}`] = true;
       synsetLinkCache[`${synset2}=${synset1}`] = true;
-      if (linkNet[synset2] === 'hype') {
+      if (
+        linkNet[synset2] === 'hype' ||
+        linkNet[synset2] === 'holo' ||
+        linkNet[synset2] === 'hmem' ||
+        linkNet[synset2] === 'hsub' ||
+        linkNet[synset2] === 'hprt' ||
+        linkNet[synset2] === 'inst'
+      ) {
         links.push({
           source: synsetIndexBySynset[synset2],
           target: synsetIndexBySynset[synset1],
