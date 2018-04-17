@@ -21,7 +21,13 @@ export const Page = ({
 }: Props) => (
   <div>
     <form onSubmit={handleSubmit}>
-      <input type="text" value={text} onChange={handleChangeText} autoFocus />
+      <input
+        type="text"
+        value={text}
+        onChange={handleChangeText}
+        style={{ outline: 0 }}
+        autoFocus
+      />
       <button style={{ border: loading && '0px' }}>
         {loading ? 'Loading ...' : 'Search'}
       </button>

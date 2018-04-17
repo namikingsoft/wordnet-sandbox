@@ -158,7 +158,7 @@ export const WordNetSvg: React.ComponentType<Props> = compose(
         .enter()
         .append('line')
         .attr('stroke', d => {
-          if (!d.link) return '#eee';
+          if (!d.link) return '#ddd';
           switch (d.link) {
             case 'hype':
             case 'hypo':
@@ -216,11 +216,6 @@ export const WordNetSvg: React.ComponentType<Props> = compose(
         })
         .attr('stroke-dasharray', '5, 5')
         .attr('stroke-width', 1);
-      // .attr('stroke-dasharray', d => (d.link ? '5, 5' : null))
-      // .attr(
-      //   'stroke-width',
-      //   d => (d.link === 'sim' || d.link === 'syns' ? 2 : 1),
-      // );
 
       const node = svg
         .selectAll('g.nodes')

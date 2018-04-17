@@ -47,11 +47,6 @@ export const App = compose(
       setLoading,
       loading,
     }: InternalProps) => {
-      // TODO
-      // searchText('正しさ');
-      // searchText('鉄砲');
-      // searchText('障害');
-      // searchText('風邪');
       const handleChangeHash = async () => {
         if (loading) return;
         const text =

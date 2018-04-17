@@ -39,7 +39,7 @@ export const convertToForceData: SearchedWordNet => ForceData = searched => {
   Object.keys(searched).forEach(synset => {
     const { senses, link } = searched[synset];
     synsetIndexBySynset[synset] = nodes.length;
-    nodes.push({ label: '', r: 20 + senses.length * 3, link });
+    nodes.push({ label: '', r: 20 + senses.length * 4, link });
     senses.forEach(child => {
       links.push({ source: synsetIndexBySynset[synset], target: nodes.length });
       nodes.push({ label: child.lemma, r: 2 });
