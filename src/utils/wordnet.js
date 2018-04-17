@@ -49,7 +49,7 @@ export const search = (text: string) => {
         )
         .all(synset)
         .sort(() => Math.random() - 0.5)
-        .slice(0, 5);
+        .slice(0, 7);
       synsSenses.forEach(({ link, ...s }) => {
         const childSenses = db
           .prepare(
