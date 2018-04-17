@@ -8,7 +8,6 @@ type Props = {
   searchedWordNet: {},
   handleChangeText: Event => *,
   handleSubmit: Event => *,
-  searchText: string => *,
 };
 
 export const Page = ({
@@ -16,7 +15,6 @@ export const Page = ({
   searchedWordNet,
   handleChangeText,
   handleSubmit,
-  searchText,
 }: Props) => (
   <div>
     <form onSubmit={handleSubmit}>
@@ -26,7 +24,6 @@ export const Page = ({
     <WordNetSvg
       text={text}
       value={searchedWordNet}
-      searchText={searchText}
       style={{
         position: 'fixed',
         zIndex: -1,

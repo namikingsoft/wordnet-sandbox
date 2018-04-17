@@ -19,7 +19,6 @@ type InternalProps = {
   element: ?React$ElementRef<*>,
   setElement: (React$ElementRef<*>) => *,
   handleResize: void => *,
-  searchText: string => *,
   ...$Exact<Props>,
 };
 
@@ -72,266 +71,261 @@ export const WordNetSvg: React.ComponentType<Props> = compose(
   willUnmount(({ handleResize }: InternalProps) => {
     window.removeEventListener('resize', handleResize);
   }),
-  didUpdate(
-    (
-      { text, value, element, handleResize, searchText }: InternalProps,
-      prev,
-    ) => {
-      if (element && element !== prev.element) {
-        handleResize();
-      }
-      if (element && value && value !== prev.value) {
-        const { width, height } = element.getBoundingClientRect();
-        const svg = d3.select(element);
-        svg.selectAll('*').remove();
-        const { nodes, links } = convertToForceData(value);
-        const simulation = d3.forceSimulation();
+  didUpdate(({ text, value, element, handleResize }: InternalProps, prev) => {
+    if (element && element !== prev.element) {
+      handleResize();
+    }
+    if (element && value && value !== prev.value) {
+      const { width, height } = element.getBoundingClientRect();
+      const svg = d3.select(element);
+      svg.selectAll('*').remove();
+      const { nodes, links } = convertToForceData(value);
+      const simulation = d3.forceSimulation();
 
-        const defs = svg.append('defs');
-        defs
-          .append('marker')
-          .attr('id', 'arrowstart')
-          .attr('refX', -30)
-          .attr('refY', 4)
-          .attr('markerWidth', 10)
-          .attr('markerHeight', 10)
-          .attr('orient', 'auto')
-          .append('path')
-          .attr('d', 'M 0,0 V 8 L8,4 Z')
-          .attr('fill', 'steelblue');
-        defs
-          .append('marker')
-          .attr('id', 'arrowend')
-          .attr('refX', 30)
-          .attr('refY', 4)
-          .attr('markerWidth', 10)
-          .attr('markerHeight', 10)
-          .attr('orient', 'auto')
-          .append('path')
-          .attr('d', 'M 0,0 V 8 L8,4 Z')
-          .attr('fill', 'steelblue');
-        defs
-          .append('marker')
-          .attr('id', 'arrowstartgrey')
-          .attr('refX', -30)
-          .attr('refY', 4)
-          .attr('markerWidth', 10)
-          .attr('markerHeight', 10)
-          .attr('orient', 'auto')
-          .append('path')
-          .attr('d', 'M 0,0 V 8 L8,4 Z')
-          .attr('fill', '#bbb');
-        defs
-          .append('marker')
-          .attr('id', 'arrowendgrey')
-          .attr('refX', 30)
-          .attr('refY', 4)
-          .attr('markerWidth', 10)
-          .attr('markerHeight', 10)
-          .attr('orient', 'auto')
-          .append('path')
-          .attr('d', 'M 0,0 V 8 L8,4 Z')
-          .attr('fill', '#bbb');
-        defs
-          .append('marker')
-          .attr('id', 'arrowstartgreen')
-          .attr('refX', -30)
-          .attr('refY', 4)
-          .attr('markerWidth', 10)
-          .attr('markerHeight', 10)
-          .attr('orient', 'auto')
-          .append('path')
-          .attr('d', 'M 0,0 V 8 L8,4 Z')
-          .attr('fill', '#9ACD32');
-        defs
-          .append('marker')
-          .attr('id', 'arrowendgreen')
-          .attr('refX', 30)
-          .attr('refY', 4)
-          .attr('markerWidth', 10)
-          .attr('markerHeight', 10)
-          .attr('orient', 'auto')
-          .append('path')
-          .attr('d', 'M 0,0 V 8 L8,4 Z')
-          .attr('fill', '#9ACD32');
+      const defs = svg.append('defs');
+      defs
+        .append('marker')
+        .attr('id', 'arrowstart')
+        .attr('refX', -30)
+        .attr('refY', 4)
+        .attr('markerWidth', 10)
+        .attr('markerHeight', 10)
+        .attr('orient', 'auto')
+        .append('path')
+        .attr('d', 'M 0,0 V 8 L8,4 Z')
+        .attr('fill', 'steelblue');
+      defs
+        .append('marker')
+        .attr('id', 'arrowend')
+        .attr('refX', 30)
+        .attr('refY', 4)
+        .attr('markerWidth', 10)
+        .attr('markerHeight', 10)
+        .attr('orient', 'auto')
+        .append('path')
+        .attr('d', 'M 0,0 V 8 L8,4 Z')
+        .attr('fill', 'steelblue');
+      defs
+        .append('marker')
+        .attr('id', 'arrowstartgrey')
+        .attr('refX', -30)
+        .attr('refY', 4)
+        .attr('markerWidth', 10)
+        .attr('markerHeight', 10)
+        .attr('orient', 'auto')
+        .append('path')
+        .attr('d', 'M 0,0 V 8 L8,4 Z')
+        .attr('fill', '#bbb');
+      defs
+        .append('marker')
+        .attr('id', 'arrowendgrey')
+        .attr('refX', 30)
+        .attr('refY', 4)
+        .attr('markerWidth', 10)
+        .attr('markerHeight', 10)
+        .attr('orient', 'auto')
+        .append('path')
+        .attr('d', 'M 0,0 V 8 L8,4 Z')
+        .attr('fill', '#bbb');
+      defs
+        .append('marker')
+        .attr('id', 'arrowstartgreen')
+        .attr('refX', -30)
+        .attr('refY', 4)
+        .attr('markerWidth', 10)
+        .attr('markerHeight', 10)
+        .attr('orient', 'auto')
+        .append('path')
+        .attr('d', 'M 0,0 V 8 L8,4 Z')
+        .attr('fill', '#9ACD32');
+      defs
+        .append('marker')
+        .attr('id', 'arrowendgreen')
+        .attr('refX', 30)
+        .attr('refY', 4)
+        .attr('markerWidth', 10)
+        .attr('markerHeight', 10)
+        .attr('orient', 'auto')
+        .append('path')
+        .attr('d', 'M 0,0 V 8 L8,4 Z')
+        .attr('fill', '#9ACD32');
 
-        const line = svg
-          .append('g')
-          .attr('class', 'links')
-          .selectAll('line')
-          .data(links)
-          .enter()
-          .append('line')
-          .attr('stroke', d => {
-            if (!d.link) return '#eee';
-            switch (d.link) {
-              case 'hype':
-              case 'hypo':
-                return 'steelblue';
-              case 'inst':
-              case 'hasi':
-              case 'sim':
-              case 'syns':
-                return '#9ACD32';
-              default:
-                return '#bbb';
-            }
-          })
-          .attr('marker-start', d => {
-            switch (d.link) {
-              case 'hype':
-              case 'hypo':
-                return 'url(#arrowstart)';
-              case 'inst':
-              case 'hasi':
-                return 'url(#arrowstartgreen)';
-              case 'mero':
-              case 'mmem':
-              case 'msub':
-              case 'mprt':
-              case 'holo':
-              case 'hmem':
-              case 'hsub':
-              case 'hprt':
-                return 'url(#arrowstartgrey)';
-              default:
-                return null;
-            }
-          })
-          .attr('marker-end', d => {
-            switch (d.link) {
-              case 'hype':
-              case 'hypo':
-                return 'url(#arrowend)';
-              case 'inst':
-              case 'hasi':
-                return 'url(#arrowendgreen)';
-              case 'mero':
-              case 'mmem':
-              case 'msub':
-              case 'mprt':
-              case 'holo':
-              case 'hmem':
-              case 'hsub':
-              case 'hprt':
-                return 'url(#arrowendgrey)';
-              default:
-                return null;
-            }
-          })
-          .attr('stroke-dasharray', '5, 5')
-          .attr('stroke-width', 1);
-        // .attr('stroke-dasharray', d => (d.link ? '5, 5' : null))
-        // .attr(
-        //   'stroke-width',
-        //   d => (d.link === 'sim' || d.link === 'syns' ? 2 : 1),
-        // );
+      const line = svg
+        .append('g')
+        .attr('class', 'links')
+        .selectAll('line')
+        .data(links)
+        .enter()
+        .append('line')
+        .attr('stroke', d => {
+          if (!d.link) return '#eee';
+          switch (d.link) {
+            case 'hype':
+            case 'hypo':
+              return 'steelblue';
+            case 'inst':
+            case 'hasi':
+            case 'sim':
+            case 'syns':
+              return '#9ACD32';
+            default:
+              return '#bbb';
+          }
+        })
+        .attr('marker-start', d => {
+          switch (d.link) {
+            case 'hype':
+            case 'hypo':
+              return 'url(#arrowstart)';
+            case 'inst':
+            case 'hasi':
+              return 'url(#arrowstartgreen)';
+            case 'mero':
+            case 'mmem':
+            case 'msub':
+            case 'mprt':
+            case 'holo':
+            case 'hmem':
+            case 'hsub':
+            case 'hprt':
+              return 'url(#arrowstartgrey)';
+            default:
+              return null;
+          }
+        })
+        .attr('marker-end', d => {
+          switch (d.link) {
+            case 'hype':
+            case 'hypo':
+              return 'url(#arrowend)';
+            case 'inst':
+            case 'hasi':
+              return 'url(#arrowendgreen)';
+            case 'mero':
+            case 'mmem':
+            case 'msub':
+            case 'mprt':
+            case 'holo':
+            case 'hmem':
+            case 'hsub':
+            case 'hprt':
+              return 'url(#arrowendgrey)';
+            default:
+              return null;
+          }
+        })
+        .attr('stroke-dasharray', '5, 5')
+        .attr('stroke-width', 1);
+      // .attr('stroke-dasharray', d => (d.link ? '5, 5' : null))
+      // .attr(
+      //   'stroke-width',
+      //   d => (d.link === 'sim' || d.link === 'syns' ? 2 : 1),
+      // );
 
-        const node = svg
-          .selectAll('g.nodes')
-          .data(nodes)
-          .enter()
-          .append('g')
-          .attr('class', 'nodes');
+      const node = svg
+        .selectAll('g.nodes')
+        .data(nodes)
+        .enter()
+        .append('g')
+        .attr('class', 'nodes');
 
-        node
-          .append('circle')
-          .attr('r', d => d.r)
-          .style('fill', d => {
-            if (d.label) return 'black';
-            if (d.link === 'self') return 'steelblue';
-            return '#ccc';
-          })
-          // .style('stroke', d => (d.label ? 'black' : '#999'))
-          // .style('stroke-width', 1)
-          .style('opacity', d => (d.label ? 1 : 0.3))
-          .call(
-            /* eslint-disable no-param-reassign */
+      node
+        .append('circle')
+        .attr('r', d => d.r)
+        .style('fill', d => {
+          if (d.label) return 'black';
+          if (d.link === 'self') return 'steelblue';
+          return '#ccc';
+        })
+        // .style('stroke', d => (d.label ? 'black' : '#999'))
+        // .style('stroke-width', 1)
+        .style('opacity', d => (d.label ? 1 : 0.3))
+        .call(
+          /* eslint-disable no-param-reassign */
+          d3
+            .drag()
+            .on('start', d => {
+              if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+              d.fx = d.x;
+              d.fy = d.y;
+            })
+            .on('drag', d => {
+              d.fx = d3.event.x;
+              d.fy = d3.event.y;
+            })
+            .on('end', d => {
+              if (!d3.event.active) simulation.alphaTarget(0);
+              d.fx = null;
+              d.fy = null;
+            }),
+          /* eslint-enable no-param-reassign */
+        );
+
+      node
+        .append('text')
+        .attr('dx', 7)
+        .attr('dy', '.35em')
+        .attr('fill', '#555')
+        .text(d => d.label)
+        .style(
+          'font-size',
+          d => (d.label.indexOf(text) > -1 ? '1.6em' : '0.75em'),
+        )
+        .on('mouseover', function handleMouseOverText() {
+          d3.select(this).attr('fill', 'steelblue');
+        })
+        .on('mouseout', function handleMouseOutText() {
+          d3.select(this).attr('fill', '#555');
+        })
+        .on('click', function handleClickText(d) {
+          if (d.label) {
             d3
-              .drag()
-              .on('start', d => {
-                if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-                d.fx = d.x;
-                d.fy = d.y;
-              })
-              .on('drag', d => {
-                d.fx = d3.event.x;
-                d.fy = d3.event.y;
-              })
-              .on('end', d => {
-                if (!d3.event.active) simulation.alphaTarget(0);
-                d.fx = null;
-                d.fy = null;
-              }),
-            /* eslint-enable no-param-reassign */
-          );
+              .select(this)
+              .attr('stroke', 'steelblue')
+              .transition()
+              .duration(250)
+              .style('font-size', '1.6em');
+            window.location.hash = `#${d.label}`;
+          }
+        });
+
+      const ticked = () => {
+        line
+          .attr('x1', d => d.source.x)
+          .attr('y1', d => d.source.y)
+          .attr('x2', d => d.target.x)
+          .attr('y2', d => d.target.y);
 
         node
-          .append('text')
-          .attr('dx', 7)
-          .attr('dy', '.35em')
-          .attr('fill', '#555')
-          .text(d => d.label)
-          .style(
-            'font-size',
-            d => (d.label.indexOf(text) > -1 ? '1.6em' : '0.75em'),
-          )
-          .on('mouseover', function handleMouseOverText() {
-            d3.select(this).attr('fill', 'steelblue');
-          })
-          .on('mouseout', function handleMouseOutText() {
-            d3.select(this).attr('fill', '#555');
-          })
-          .on('click', function handleClickText(d) {
-            if (d.label) {
-              d3
-                .select(this)
-                .attr('stroke', 'steelblue')
-                .transition()
-                .duration(250)
-                .style('font-size', '1.6em');
-              searchText(d.label);
-            }
-          });
+          .selectAll('circle')
+          .attr('cx', d => d.x)
+          .attr('cy', d => d.y);
 
-        const ticked = () => {
-          line
-            .attr('x1', d => d.source.x)
-            .attr('y1', d => d.source.y)
-            .attr('x2', d => d.target.x)
-            .attr('y2', d => d.target.y);
+        node
+          .selectAll('text')
+          .attr('x', d => d.x)
+          .attr('y', d => d.y)
+          .style('cursor', 'pointer');
+      };
 
-          node
-            .selectAll('circle')
-            .attr('cx', d => d.x)
-            .attr('cy', d => d.y);
-
-          node
-            .selectAll('text')
-            .attr('x', d => d.x)
-            .attr('y', d => d.y)
-            .style('cursor', 'pointer');
-        };
-
-        simulation.nodes(nodes).on('tick', ticked);
-        simulation
-          .velocityDecay(0.5)
-          .force('link', d3.forceLink().id(d => d.index))
-          .force('collide', d3.forceCollide(d => d.r + 12).iterations(16))
-          .force('charge', d3.forceManyBody())
-          .force('center', d3.forceCenter(width / 2, height / 2))
-          .force('y', d3.forceY(0))
-          .force('x', d3.forceX(0));
-        simulation
-          .force('link')
-          .links(links)
-          .distance(() => 10)
-          .strength(() => 2);
-        simulation.force('charge').strength(() => -750);
-      }
-    },
-  ),
-  mapProps(({ element, handleResize, searchText, ...rest }) => ({
+      simulation.nodes(nodes).on('tick', ticked);
+      simulation
+        .velocityDecay(0.5)
+        .force('link', d3.forceLink().id(d => d.index))
+        .force('collide', d3.forceCollide(d => d.r + 12).iterations(16))
+        .force('charge', d3.forceManyBody())
+        .force('center', d3.forceCenter(width / 2, height / 2))
+        .force('y', d3.forceY(0))
+        .force('x', d3.forceX(0));
+      simulation
+        .force('link')
+        .links(links)
+        .distance(() => 10)
+        .strength(() => 2);
+      simulation.force('charge').strength(() => -750);
+    }
+  }),
+  mapProps(({ element, handleResize, ...rest }) => ({
     ...rest,
   })),
 )(Svg);

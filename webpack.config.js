@@ -75,6 +75,7 @@ const development = {
     stats: { colors: true },
     host: DOCKER ? '0.0.0.0' : 'localhost',
     port: Number(PORT) || 8080,
+    // historyApiFallback: true,
   },
 };
 

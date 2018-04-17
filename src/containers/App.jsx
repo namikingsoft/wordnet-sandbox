@@ -13,7 +13,6 @@ type InternalProps = {
   handleSubmit: Event => *,
   text: string,
   changeText: string => *,
-  searchText: string => *,
 };
 
 export const App = compose(
@@ -32,35 +31,38 @@ export const App = compose(
     handleChangeText: ({ changeText }: InternalProps) => event => {
       changeText(event.target.value);
     },
-    handleSubmit: ({
-      text,
-      setSearchedWordNet,
-    }: InternalProps) => async event => {
-      if (event) event.preventDefault();
-      setSearchedWordNet(null);
-      const body = await window
-        .fetch(
-          `http://localhost:3000/wordnet/search?text=${encodeURIComponent(
-            text,
-          )}`,
-        )
-        .then(res => res.json());
-      setSearchedWordNet(body);
+    handleSubmit: ({ text }: InternalProps) => async event => {
+      event.preventDefault();
+      window.location.hash = `#${text}`;
     },
   }),
-  withHandlers({
-    searchText: ({ changeText, handleSubmit }: InternalProps) => async text => {
-      changeText(text);
-      await new Promise(resolve => setTimeout(resolve, 100)); // TODO
-      handleSubmit(window.event);
-    },
-  }),
-  didMount(({ searchText }: InternalProps) => {
+  didMount(({ changeText, setSearchedWordNet }: InternalProps) => {
     // TODO
     // searchText('正しさ');
     // searchText('鉄砲');
     // searchText('障害');
-    searchText('風邪');
+    // searchText('風邪');
+    const handleChangeHash = async event => {
+      console.log(event);
+      const text =
+        window.location.hash &&
+        decodeURIComponent(window.location.hash.slice(1));
+      if (text) {
+        changeText(text);
+        await new Promise(resolve => setTimeout(resolve, 100)); // TODO
+        setSearchedWordNet(null);
+        const body = await window
+          .fetch(
+            `http://localhost:3000/wordnet/search?text=${encodeURIComponent(
+              text,
+            )}`,
+          )
+          .then(res => res.json());
+        setSearchedWordNet(body);
+      }
+    };
+    window.onpopstate = handleChangeHash;
+    handleChangeHash();
   }),
   mapProps(({ changeText, setSearchedWordNet, ...rest }) => rest),
 )(Page);
