@@ -67,7 +67,7 @@ export const search = (text: string) => {
         }
       });
       const dataNum = Object.keys(data).length;
-      if (dataNum === preDataNum || dataNum > 30) return;
+      if (dataNum === preDataNum || dataNum > 24) return;
       findRecurcive(synsSenses);
     });
   };
