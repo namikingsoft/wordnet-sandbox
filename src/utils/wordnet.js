@@ -11,7 +11,6 @@ export const search = async (text: string) => {
       SELECT sense.synset, word.lemma FROM sense
         INNER JOIN word ON word.wordid = sense.wordid
         WHERE word.lemma LIKE ?
-        ORDER BY sense.synset ASC
       `,
     )
     .all(`%${text}%`)
@@ -24,9 +23,8 @@ export const search = async (text: string) => {
         `
         SELECT sense.synset, word.lemma FROM sense
           INNER JOIN word ON word.wordid = sense.wordid
-          WHERE sense.synset = ?
-            AND sense.lang = 'jpn'
-          ORDER BY sense.synset ASC
+          WHERE sense.lang = 'jpn'
+            AND sense.synset = ?
         `,
       )
       .all(synset);
@@ -36,8 +34,7 @@ export const search = async (text: string) => {
     };
   });
 
-  const findRecurcive = senses => {
-    const preDataNum = Object.keys(data).length;
+  const findRecurcive = (senses, depth = 0) => {
     senses.forEach(({ synset }) => {
       const synsSenses = db
         .prepare(
@@ -45,33 +42,37 @@ export const search = async (text: string) => {
           SELECT synlink.link, synlink.synset2 as synset FROM sense
             INNER JOIN word ON word.wordid = sense.wordid
             INNER JOIN synlink ON synlink.synset1 = sense.synset
-            WHERE sense.synset = ?
-              AND sense.lang = 'jpn'
-            ORDER BY sense.synset ASC
+            WHERE sense.lang = 'jpn'
+              AND sense.synset = ?
           `,
         )
         .all(synset)
-        .sort(() => Math.random() - 0.5)
-        .slice(0, 7);
+        .sort(() => Math.random() - 0.5);
+      const filteredSynsSenses = [];
       synsSenses.forEach(({ link, ...s }) => {
         const childSenses = db
           .prepare(
             `
             SELECT sense.synset, word.lemma FROM sense
               INNER JOIN word ON word.wordid = sense.wordid
-              WHERE sense.synset = ?
-                AND sense.lang = 'jpn'
-              ORDER BY sense.synset ASC
+              WHERE sense.lang = 'jpn'
+                AND sense.synset = ?
             `,
           )
           .all(s.synset);
-        if (childSenses.length > 0 && !data[s.synset]) {
-          data[s.synset] = { senses: childSenses, link };
+        if (
+          childSenses.length > 0 &&
+          filteredSynsSenses.length < 5 &&
+          !data[s.synset]
+        ) {
+          const sense = { synset: s.synset, senses: childSenses, link };
+          filteredSynsSenses.push(sense);
+          data[s.synset] = sense;
         }
       });
-      const dataNum = Object.keys(data).length;
-      if (dataNum === preDataNum || dataNum > 24) return;
-      findRecurcive(synsSenses);
+      if (filteredSynsSenses.length === 0 || depth > 1) return;
+      console.log(depth, filteredSynsSenses);
+      findRecurcive(filteredSynsSenses, depth + 1);
     });
   };
   findRecurcive(selfSenses);
