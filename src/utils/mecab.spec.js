@@ -96,6 +96,8 @@ describe('mecabStdio', () => {
         nbest: 2,
       },
     ]);
+
+    // using nbest2 but one morph via stdio continuous
     expect(await mecab.nbest2.parse('卑猥')).toEqual([
       {
         surface: '卑猥',

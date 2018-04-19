@@ -268,7 +268,7 @@ export const WordNetSvg: React.ComponentType<Props> = compose(
         .text(d => d.label)
         .style(
           'font-size',
-          d => (d.label.indexOf(text) > -1 ? '1.6em' : '0.75em'),
+          d => (d.label.indexOf(text) > -1 ? '1.75em' : '1em'),
         )
         .on('mouseover', function handleMouseOverText() {
           d3.select(this).attr('fill', 'steelblue');
@@ -321,7 +321,7 @@ export const WordNetSvg: React.ComponentType<Props> = compose(
         .links(links)
         .distance(() => 10)
         .strength(() => 2);
-      simulation.force('charge').strength(() => -750);
+      simulation.force('charge').strength(() => -1000);
     }
   }),
   mapProps(({ element, handleResize, ...rest }) => ({
