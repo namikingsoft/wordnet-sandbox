@@ -36,8 +36,8 @@ export const mecabStdio: MecabStdioParam => MecabStdioInstance = ({
 } = {}) => {
   const lines = [];
   const args = [
-    `-E${eosLabel}`,
-    `-N${nbest}\n`,
+    `-E${eosLabel}\n`,
+    `-N${nbest}`,
     '-F%M\t%f[7]\t%f[6]\t%f[0]\t%f[1]\t%f[2]\t%f[3]\t%f[4]\t%f[5]\n',
   ];
   if (dicdir) args.push(`-d${dicdir}`);
@@ -61,6 +61,7 @@ export const mecabStdio: MecabStdioParam => MecabStdioInstance = ({
           if (eosNum === nbest) {
             return resolve(
               lines
+                .filter(x => !!x)
                 .reduce(
                   ({ results, nbestCount }, x) =>
                     x.indexOf(eosLabel) > -1

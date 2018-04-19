@@ -9,7 +9,7 @@
     "lint": "eslint src --ext .js,.jsx --cache",
     "spec": "jest",
     "test": "yarn type && yarn lint && yarn spec",
-    "test:watch": "yarn spec --watch",
+    "test:watch": "yarn spec --watchAll",
     "server:dev": "backpack",
     "server:build": "backpack build",
     "server:start": "node build/main.js",

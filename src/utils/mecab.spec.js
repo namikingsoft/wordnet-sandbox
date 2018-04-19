@@ -73,6 +73,18 @@ describe('mecabStdio', () => {
         nbest: 1,
       },
       {
+        surface: '中居',
+        reading: 'ナカイ',
+        basic: '中居',
+        feature0: '名詞',
+        feature1: '固有名詞',
+        feature2: '人名',
+        feature3: '姓',
+        feature4: '',
+        feature5: '',
+        nbest: 2,
+      },
+      {
         surface: '正広',
         reading: 'マサヒロ',
         basic: '正広',
