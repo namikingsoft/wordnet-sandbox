@@ -1,4 +1,4 @@
-FROM node:8.11.1-wheezy
+FROM node:8.11.1-stretch
 
 ENV DOCKER true
 ENV APP_ROOT /app
@@ -20,7 +20,7 @@ RUN git clone --depth 1 https://github.com/neologd/mecab-ipadic-neologd.git\
  && cd mecab-ipadic-neologd\
  && mkdir -p "$(mecab-config --dicdir)"\
  && ./bin/install-mecab-ipadic-neologd -n -y\
- && mv /usr/lib/mecab/dic/mecab-ipadic-neologd /resources/\
+ && mv /usr/lib/x86_64-linux-gnu/mecab/dic/mecab-ipadic-neologd /resources/\
  && sed -i "s/^dicdir = /; dicdir = /g" /etc/mecabrc\
  && echo "dicdir = /resources/mecab-ipadic-neologd" >> /etc/mecabrc\
  && cd ..\

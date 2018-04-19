@@ -109,10 +109,4 @@ export const mecabStdio: MecabStdioParam => MecabStdioInstance = ({
   };
 };
 
-// const mecab = mecabStdio({ nbest: 1 });
-// mecab.parse('似つかわしげ').then(xs => {
-//   console.log(xs);
-//   mecab.exit();
-// });
-
 export default mecabStdio;

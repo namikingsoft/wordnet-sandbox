@@ -18,7 +18,7 @@ Development
 
 ```bash
 docker-compose build
-docker-compose run --rm yarn 
+docker-compose run --rm app yarn
 docker-compose up -d
 
 open http://localhost:8080
@@ -28,8 +28,8 @@ Test
 ----------------------------------------
 
 ```bash
-yarn install
-yarn test
+docker-compose run --rm app yarn test
+docker-compose run --rm app yarn test:watch
 ```
 
 [circle-badge]: https://circleci.com/gh/namikingsoft/wordnet-sandbox.svg?style=svg
