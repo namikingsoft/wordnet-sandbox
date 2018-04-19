@@ -32,3 +32,8 @@ Test
 docker-compose run --rm app yarn test
 docker-compose run --rm app yarn test:watch
 ```
+
+Powered by
+----------------------------------------
+
+[Japanese Wordnet (vXX) © 2009-2011 NICT, 2012-2015 Francis Bond and 2016-2017 Francis Bond, Takayuki Kuribayashi](http://compling.hss.ntu.edu.sg/wnja/index.en.html)
