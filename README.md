@@ -1,4 +1,4 @@
-WordNet Visualization Sandbox [![CircleCI][circle-badge]][circle-url]
+WordNet Visualization Sandbox
 ========================================
 
 Getting Started
@@ -31,6 +31,3 @@ Test
 docker-compose run --rm app yarn test
 docker-compose run --rm app yarn test:watch
 ```
-
-[circle-badge]: https://circleci.com/gh/namikingsoft/wordnet-sandbox.svg?style=svg
-[circle-url]: https://circleci.com/gh/namikingsoft/wordnet-sandbox
