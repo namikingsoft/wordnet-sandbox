@@ -58,8 +58,7 @@ describe('mecabStdio', () => {
   });
 
   it('should parse by nbest2', async () => {
-    const morphes = await mecab.nbest2.parse('中居正広');
-    expect(morphes).toEqual([
+    expect(await mecab.nbest2.parse('中居正広')).toEqual([
       {
         surface: '中居正広',
         reading: 'ナカイマサヒロ',
@@ -97,11 +96,7 @@ describe('mecabStdio', () => {
         nbest: 2,
       },
     ]);
-  });
-
-  it('should parse by nbest2 but find only one', async () => {
-    const morphes = await mecab.nbest2.parse('卑猥');
-    expect(morphes).toEqual([
+    expect(await mecab.nbest2.parse('卑猥')).toEqual([
       {
         surface: '卑猥',
         reading: 'ヒワイ',

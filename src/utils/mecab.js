@@ -40,7 +40,7 @@ export const mecabStdio: MecabStdioParam => MecabStdioInstance = ({
     `-E${eosLabel}\n`,
     `-S${eonLabel}\n`,
     `-N${nbest}`,
-    '-F%M\t%f[7]\t%f[6]\t%f[0]\t%f[1]\t%f[2]\t%f[3]\t%f[4]\t%f[5]\n',
+    '-F%M,%H\n',
   ];
   if (dicdir) args.push(`-d${dicdir}`);
   const mecab = spawn('mecab', args, { detached: true });
@@ -51,8 +51,7 @@ export const mecabStdio: MecabStdioParam => MecabStdioInstance = ({
     exit: () => mecab.kill(),
     parse: (str: string) =>
       new Promise((resolve, reject) => {
-        mecab.stdin.write(str.replace(/\n/g, ' '));
-        mecab.stdin.write('\n');
+        mecab.stdin.write(`${str.replace(/\n/g, ' ')}\n`);
         const maxCount = Math.floor(timeoutMsec / pollingMsec);
         const check = count => {
           if (count >= maxCount) return reject(new Error('timeout'));
@@ -62,7 +61,10 @@ export const mecabStdio: MecabStdioParam => MecabStdioInstance = ({
           if (isFinished) {
             return resolve(
               lines
+                .splice(0, lines.length)
                 .filter(x => !!x && x !== eonLabel)
+                .map(x => x.slice(0, 1) + x.slice(1).replace(/,/g, '\t'))
+                .map(x => x.slice(0, 1) + x.slice(1).replace(/\*/g, ''))
                 .reduce(
                   ({ results, nbestCount }, x) =>
                     x.indexOf(eosLabel) > -1
@@ -71,7 +73,7 @@ export const mecabStdio: MecabStdioParam => MecabStdioInstance = ({
                           nbestCount: nbestCount + 1,
                         }
                       : {
-                          results: [...results, `${x}\t${nbestCount}`],
+                          results: [...results, `${nbestCount}\t${x}`],
                           nbestCount,
                         },
                   { results: [], nbestCount: 1 },
@@ -79,27 +81,27 @@ export const mecabStdio: MecabStdioParam => MecabStdioInstance = ({
                 .results.map(x => x.split('\t'))
                 .map(
                   ([
-                    surface,
-                    reading,
-                    basic,
-                    feature0,
-                    feature1,
-                    feature2,
-                    feature3,
-                    feature4,
-                    feature5,
                     nbestCount,
-                  ]) => ({
                     surface,
-                    reading,
-                    basic,
                     feature0,
                     feature1,
                     feature2,
                     feature3,
                     feature4,
                     feature5,
+                    basic,
+                    reading,
+                  ]) => ({
                     nbest: Number(nbestCount),
+                    surface,
+                    feature0,
+                    feature1,
+                    feature2,
+                    feature3,
+                    feature4,
+                    feature5,
+                    basic,
+                    reading,
                   }),
                 ),
             );
