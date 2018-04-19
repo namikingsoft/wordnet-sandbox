@@ -71,7 +71,6 @@ export const search = async (text: string) => {
         }
       });
       if (filteredSynsSenses.length === 0 || depth > 1) return;
-      console.log(depth, filteredSynsSenses);
       findRecurcive(filteredSynsSenses, depth + 1);
     });
   };
