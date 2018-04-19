@@ -1,10 +1,19 @@
 // @flow
 import Database from 'better-sqlite3';
 
+import { mecabStdio } from './mecab';
+
 const db = new Database('/resources/wnjpn.db');
 
-export const search = (text: string) => {
+const mecab = mecabStdio({ nbest: 1 });
+
+export const search = async (text: string) => {
   const data = {};
+  // const morphes = await mecab.parse(text);
+  // const basics = morphes
+  //   .filter(({ feature0 }) => feature0)
+  //   .map(({ basic }) => basic);
+  // console.log('morphes', morphes);
   const selfSenses = db
     .prepare(
       `
