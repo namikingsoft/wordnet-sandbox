@@ -1,19 +1,10 @@
 // @flow
 import Database from 'better-sqlite3';
 
-import { mecabStdio } from './mecab';
-
 const db = new Database('/resources/wnjpn.db');
-
-const mecab = mecabStdio({ nbest: 1 });
 
 export const search = async (text: string) => {
   const data = {};
-  // const morphes = await mecab.parse(text);
-  // const basics = morphes
-  //   .filter(({ feature0 }) => feature0)
-  //   .map(({ basic }) => basic);
-  // console.log('morphes', morphes);
   const selfSenses = db
     .prepare(
       `
@@ -27,7 +18,7 @@ export const search = async (text: string) => {
     .sort(() => Math.random() - 0.5)
     .slice(0, 5);
 
-  selfSenses.forEach(({ synset }) => {
+  selfSenses.forEach(({ synset, lemma }) => {
     const childSenses = db
       .prepare(
         `
@@ -39,7 +30,10 @@ export const search = async (text: string) => {
         `,
       )
       .all(synset);
-    data[synset] = { senses: childSenses, link: 'self' };
+    data[synset] = {
+      senses: childSenses,
+      link: text === lemma ? 'self' : 'part',
+    };
   });
 
   const findRecurcive = senses => {

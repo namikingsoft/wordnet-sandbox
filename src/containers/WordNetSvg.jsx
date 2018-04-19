@@ -229,11 +229,15 @@ export const WordNetSvg: React.ComponentType<Props> = compose(
         .attr('r', d => d.r)
         .style('fill', d => {
           if (d.label) return 'black';
-          if (d.link === 'self') return 'steelblue';
-          return '#ccc';
+          switch (d.link) {
+            case 'self':
+              return 'steelblue';
+            case 'part':
+              return '#9ACD32';
+            default:
+              return '#ccc';
+          }
         })
-        // .style('stroke', d => (d.label ? 'black' : '#999'))
-        // .style('stroke-width', 1)
         .style('opacity', d => (d.label ? 1 : 0.3))
         .call(
           /* eslint-disable no-param-reassign */
