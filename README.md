@@ -1,5 +1,6 @@
 WordNet Visualization Sandbox
 ========================================
+Install docker required.
 
 Getting Started
 ----------------------------------------
