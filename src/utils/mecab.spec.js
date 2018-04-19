@@ -98,4 +98,22 @@ describe('mecabStdio', () => {
       },
     ]);
   });
+
+  it('should parse by nbest2 but find only one', async () => {
+    const morphes = await mecab.nbest2.parse('卑猥');
+    expect(morphes).toEqual([
+      {
+        surface: '卑猥',
+        reading: 'ヒワイ',
+        basic: '卑猥',
+        feature0: '名詞',
+        feature1: '形容動詞語幹',
+        feature2: '',
+        feature3: '',
+        feature4: '',
+        feature5: '',
+        nbest: 1,
+      },
+    ]);
+  });
 });

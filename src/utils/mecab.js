@@ -27,6 +27,7 @@ type MecabStdioInstance = {
 };
 
 const eosLabel = 'EOS';
+const eonLabel = 'EON';
 
 export const mecabStdio: MecabStdioParam => MecabStdioInstance = ({
   dicdir,
@@ -37,6 +38,7 @@ export const mecabStdio: MecabStdioParam => MecabStdioInstance = ({
   const lines = [];
   const args = [
     `-E${eosLabel}\n`,
+    `-S${eonLabel}\n`,
     `-N${nbest}`,
     '-F%M\t%f[7]\t%f[6]\t%f[0]\t%f[1]\t%f[2]\t%f[3]\t%f[4]\t%f[5]\n',
   ];
@@ -54,14 +56,13 @@ export const mecabStdio: MecabStdioParam => MecabStdioInstance = ({
         const maxCount = Math.floor(timeoutMsec / pollingMsec);
         const check = count => {
           if (count >= maxCount) return reject(new Error('timeout'));
-          const eosNum = lines.reduce(
-            (acc, x) => acc + (x.indexOf(eosLabel) > -1 ? 1 : 0),
-            0,
-          );
-          if (eosNum === nbest) {
+          const isFinished =
+            !!lines.find(x => x.indexOf(eonLabel) > -1) ||
+            (nbest === 1 && lines.find(x => x.indexOf(eosLabel) > -1));
+          if (isFinished) {
             return resolve(
               lines
-                .filter(x => !!x)
+                .filter(x => !!x && x !== eonLabel)
                 .reduce(
                   ({ results, nbestCount }, x) =>
                     x.indexOf(eosLabel) > -1
