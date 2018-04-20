@@ -6,9 +6,9 @@ Getting Started
 ----------------------------------------
 
 ```bash
-docker run --rm --name wordnetfront -p 3000:3000 -d \
+docker run --rm --name wordnetserver -p 3000:3000 -d \
   namikingsoft/wordnet-sandbox server
-docker run --rm --name wordnetserver -p 8080:8080 -d \
+docker run --rm --name wordnetfront -p 8080:8080 -d \
   namikingsoft/wordnet-sandbox front
 
 open http://localhost:8080
